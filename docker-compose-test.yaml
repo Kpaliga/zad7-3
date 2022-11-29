@@ -1,0 +1,39 @@
+version: "3.9"
+services:
+  db-test:
+    image: diamol/postgres:11.5
+    ports:
+      - "5433:5433"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - app-net
+    volumes:
+      - ${PGDATA_TEST}:/docker-entrypoint-initdb.d
+
+  todo-web-test:
+    image: diamol/ch06-todo-list:v2
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - app-net
+    volumes:
+      - ${PGDATA_TEST}:/docker-entrypoint-initdb.d
+    secrets:
+      - source: postgres-connection
+        target: /app/config/secrets.json
+
+networks:
+  app-net:
+
+volumes:
+  pg-data-test:
+    name: pg-data-test
+
+secrets:
+  postgres-connection:
+    file: ./config/secrets.json
